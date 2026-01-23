@@ -7,13 +7,13 @@ Features:
 - De-Frame Gap: Remove gaps between subtitles
 
 Author: pololer
-Version: 1.0
+Version: 1.1
 ]]
 
 script_name = "Frame Gap"
 script_description = "Apply/Remove gaps between subtitles like Subtitle Edit"
 script_author = "pololer"
-script_version = "1.0"
+script_version = "1.1"
 
 -- Include Aegisub modules
 local util = require 'aegisub.util'
