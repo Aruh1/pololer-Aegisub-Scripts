@@ -5,11 +5,11 @@
     "maintainer": "pololer",
     "baseUrl": "https://github.com/Aruh1/pololer-Aegisub-Scripts",
     "url": "@{baseUrl}",
-    "fileBaseUrl": "https://raw.githubusercontent.com/Aruh1/pololer-Aegisub-Scripts/@{channel}/",
+    "fileBaseUrl": "https://raw.githubusercontent.com/Aruh1/pololer-Aegisub-Scripts/@{namespace}",
     "macros": {
         "polo.FrameGap": {
             "url": "@{baseUrl}#@{namespace}",
-            "fileBaseUrl": "@{fileBaseUrl}macros/",
+            "fileBaseUrl": "@{fileBaseUrl}/macros/@{namespace}",
             "author": "pololer",
             "name": "Frame Gap",
             "description": "Apply/Remove gaps between subtitles like Subtitle Edit",
@@ -21,7 +21,7 @@
                     "files": [
                         {
                             "name": ".lua",
-                            "url": "@{fileBaseUrl}polo.FrameGap.lua",
+                            "url": "@{fileBaseUrl}@{filename}",
                             "sha1": "328F3B7ED5BCBB7DFEF38E91BA541ACC57DBA8B1"
                         }
                     ]
