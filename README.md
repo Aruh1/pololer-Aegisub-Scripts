@@ -4,7 +4,7 @@ Kumpulan automation scripts untuk Aegisub, terinspirasi dari fitur-fitur Subtitl
 
 ## 📦 Scripts
 
-### Frame Gap (`polo.frame-gap.lua`)
+### Frame Gap (`polo.FrameGap.lua`)
 
 Script untuk mengatur gap (jarak waktu) antar subtitle, mirip dengan fitur Frame Gap di Subtitle Edit.
 

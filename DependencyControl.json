@@ -9,7 +9,7 @@
     "macros": {
         "polo.FrameGap": {
             "url": "@{baseUrl}#@{namespace}",
-            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/",
             "author": "pololer",
             "name": "Frame Gap",
             "description": "Apply/Remove gaps between subtitles like Subtitle Edit",
