@@ -1,0 +1,51 @@
+{
+    "dependencyControlFeedFormatVersion": "0.3.0",
+    "name": "pololer's Aegisub Scripts",
+    "description": "Kumpulan automation scripts untuk Aegisub, terinspirasi dari fitur-fitur Subtitle Edit.",
+    "maintainer": "pololer",
+    "baseUrl": "https://github.com/Aruh1/pololer-Aegisub-Scripts",
+    "url": "@{baseUrl}",
+    "fileBaseUrl": "https://raw.githubusercontent.com/Aruh1/pololer-Aegisub-Scripts/@{channel}/",
+    "macros": {
+        "polo.FrameGap": {
+            "url": "@{baseUrl}#@{namespace}",
+            "fileBaseUrl": "@{fileBaseUrl}macros/@{namespace}",
+            "author": "pololer",
+            "name": "Frame Gap",
+            "description": "Apply/Remove gaps between subtitles like Subtitle Edit",
+            "channels": {
+                "main": {
+                    "default": true,
+                    "version": "1.2.0",
+                    "released": "2026-01-24",
+                    "files": [
+                        {
+                            "name": ".lua",
+                            "url": "@{fileBaseUrl}@{fileName}",
+                            "sha1": ""
+                        }
+                    ]
+                }
+            },
+            "changelog": {
+                "1.0.0": [
+                    "Initial release with Frame Gap feature"
+                ],
+                "1.1.0": [
+                    "Add De-Frame Gap feature",
+                    "Fix time calculation bug (ms vs cs)",
+                    "Fix frame rate dropdown"
+                ],
+                "1.2.0": [
+                    "Performance optimization: lazy loading selection set, pre-calculated dialogue count",
+                    "Bug fix: Add missing `return sel` to all macro functions",
+                    "Bug fix: Early exit for files with < 2 dialogue lines",
+                    "Refactor: Remove unused import (`aegisub.util`)",
+                    "Refactor: Replace `goto continue` with cleaner control flow",
+                    "Add constants: `MIN_SUBTITLE_DURATION_MS` and `DEFAULT_MAX_GAP_TO_CLOSE`",
+                    "Add LuaDoc annotations for main functions"
+                ]
+            }
+        }
+    }
+}
