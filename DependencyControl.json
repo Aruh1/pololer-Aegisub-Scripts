@@ -21,7 +21,7 @@
                     "files": [
                         {
                             "name": ".lua",
-                            "url": "@{fileBaseUrl}@{fileName}",
+                            "url": "@{fileBaseUrl}polo.FrameGap.lua",
                             "sha1": "328F3B7ED5BCBB7DFEF38E91BA541ACC57DBA8B1"
                         }
                     ]
