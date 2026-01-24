@@ -53,6 +53,13 @@ Script untuk mengatur gap (jarak waktu) antar subtitle, mirip dengan fitur Frame
 
 ## 📝 Changelog
 
+### v1.2
+- **Optimisasi performa**: Lazy loading selection set, pre-calculated dialogue count
+- **Bug fix**: Menambahkan `return sel` yang hilang pada semua fungsi macro
+- **Bug fix**: Early exit untuk file dengan < 2 dialogue lines
+- **Refactor**: Ganti `goto continue` dengan control flow yang lebih bersih
+- **Dokumentasi**: Tambah LuaDoc annotations untuk fungsi utama
+
 ### v1.1
 - Tambah fitur De-Frame Gap
 - Perbaikan bug perhitungan waktu (ms vs cs)
