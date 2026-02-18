@@ -56,18 +56,22 @@
             "channels": {
                 "main": {
                     "default": true,
-                    "version": "1.0.0",
-                    "released": "2026-01-24",
+                    "version": "1.1.0",
+                    "released": "2026-02-18",
                     "files": [
                         {
                             "name": ".lua",
                             "url": "@{fileBaseUrl}@{fileName}",
-                            "sha1": "ac1c117283315fac8ea3e5210d21c41dc45b1717"
+                            "sha1": "87fed3484d842a8749988850ef72b9c7eba9c748"
                         }
                     ]
                 }
             },
             "changelog": {
+                "1.1.0": [
+                    "Bug fix: Preserve non-karaoke override tags during splitting",
+                    "Only strip karaoke timing tags (\\k, \\K, \\kf, \\ko)"
+                ],
                 "1.0.0": [
                     "Initial release",
                     "Split modes: character, word, syllable (Japanese romaji)",
