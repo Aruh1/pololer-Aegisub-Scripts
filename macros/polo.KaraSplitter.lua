@@ -9,13 +9,13 @@ Features:
 - De-Ktime: Remove all karaoke timing tags
 
 Author: pololer
-Version: 1.0
+Version: 1.1
 ]]
 
 script_name = "KaraSplitter"
 script_description = "Split karaoke timing by character, word, or syllable"
 script_author = "pololer"
-script_version = "1.0"
+script_version = "1.1"
 
 -- ============================================================================
 -- CONSTANTS
@@ -109,6 +109,65 @@ end
 ---@return string
 local function de_ktime(text)
     return text:gsub("{[^}]*}", "")
+end
+
+--- Strip only karaoke timing tags from a tag block, preserving other tags.
+--- Removes \k, \K, \kf, \ko followed by optional digits.
+--- Returns the cleaned tag block, or empty string if nothing remains.
+---@param tag_block string e.g. "{\\q2\\k50\\c&H000057&}"
+---@return string
+local function strip_k_tags(tag_block)
+    -- Remove the outer braces to work with inner content
+    local inner = tag_block:sub(2, -2)
+    -- Remove karaoke tags: \k, \K, \kf, \ko followed by optional digits
+    inner = inner:gsub("\\[kK][fo]?%d*", "")
+    if inner == "" then
+        return ""
+    end
+    return "{" .. inner .. "}"
+end
+
+--- Parse text into segments of tags and plain text.
+--- Strips karaoke timing tags but preserves all other override tags.
+--- Returns:
+---   plain_text: the text with all tags removed (for splitting)
+---   tag_positions: array of {pos=number, tag=string} where pos is the
+---                  character position in plain_text where the tag should appear
+---@param text string
+---@return string, table
+local function parse_text_with_tags(text)
+    local plain_text = ""
+    local tag_positions = {}
+    local pos = 1
+    local len = #text
+    
+    while pos <= len do
+        local char = text:sub(pos, pos)
+        if char == "{" then
+            -- Find closing brace
+            local close_idx = text:find("}", pos, true)
+            local tag_block
+            if close_idx then
+                tag_block = text:sub(pos, close_idx)
+                pos = close_idx + 1
+            else
+                tag_block = text:sub(pos)
+                pos = len + 1
+            end
+            -- Strip karaoke tags, keep the rest
+            local cleaned = strip_k_tags(tag_block)
+            if cleaned ~= "" then
+                -- Position is current length of plain_text (0-indexed char boundary)
+                local char_pos = utf8_len(plain_text)
+                table.insert(tag_positions, {pos = char_pos, tag = cleaned})
+            end
+        else
+            plain_text = plain_text .. char
+            pos = pos + 1
+        end
+    end
+    
+    return plain_text, tag_positions
 end
 
 -- ============================================================================
@@ -333,31 +392,92 @@ local function str_to_kara_array(kara_text, mode)
     return {}
 end
 
---- Convert array to k-timed string with calculated timing
+--- Collect all tags that should be inserted at a given character position
+---@param tag_positions table
+---@param char_pos number
+---@return string
+local function get_tags_at_pos(tag_positions, char_pos)
+    local tags = ""
+    for _, tp in ipairs(tag_positions) do
+        if tp.pos == char_pos then
+            tags = tags .. tp.tag
+        end
+    end
+    return tags
+end
+
+--- Convert array to k-timed string with calculated timing, re-inserting preserved tags
 ---@param kara_split_array table
 ---@param time_per_letter number
+---@param tag_positions table|nil
 ---@return string
-local function arr_to_k_str(kara_split_array, time_per_letter)
+local function arr_to_k_str(kara_split_array, time_per_letter, tag_positions)
     if #kara_split_array == 0 then return "" end
+    tag_positions = tag_positions or {}
     
     local result = ""
+    local char_offset = 0
+    
     for _, syl in ipairs(kara_split_array) do
         local syl_len = utf8_len(syl)
-        result = result .. string.format("{\\k%d}%s", time_per_letter * syl_len, syl)
+        -- Collect tags that belong before this syllable
+        local pre_tags = get_tags_at_pos(tag_positions, char_offset)
+        result = result .. pre_tags .. string.format("{\\k%d}%s", time_per_letter * syl_len, syl)
+        
+        -- Check for tags within the syllable (between characters)
+        local syl_chars = utf8_chars(syl)
+        for ci = 2, #syl_chars do
+            local inner_tags = get_tags_at_pos(tag_positions, char_offset + ci - 1)
+            if inner_tags ~= "" then
+                -- Insert mid-syllable tags after the syllable text
+                result = result .. inner_tags
+            end
+        end
+        
+        char_offset = char_offset + syl_len
     end
+    
+    -- Append any trailing tags (at the very end of the text)
+    local trailing = get_tags_at_pos(tag_positions, char_offset)
+    if trailing ~= "" then
+        result = result .. trailing
+    end
+    
     return result
 end
 
---- Convert array to k-timed string with fixed k1
+--- Convert array to k-timed string with fixed k1, re-inserting preserved tags
 ---@param kara_split_array table
+---@param tag_positions table|nil
 ---@return string
-local function arr_to_k_str_fixed(kara_split_array)
+local function arr_to_k_str_fixed(kara_split_array, tag_positions)
     if #kara_split_array == 0 then return "" end
+    tag_positions = tag_positions or {}
     
     local result = ""
+    local char_offset = 0
+    
     for _, syl in ipairs(kara_split_array) do
-        result = result .. "{\\k1}" .. syl
+        local syl_len = utf8_len(syl)
+        local pre_tags = get_tags_at_pos(tag_positions, char_offset)
+        result = result .. pre_tags .. "{\\k1}" .. syl
+        
+        local syl_chars = utf8_chars(syl)
+        for ci = 2, #syl_chars do
+            local inner_tags = get_tags_at_pos(tag_positions, char_offset + ci - 1)
+            if inner_tags ~= "" then
+                result = result .. inner_tags
+            end
+        end
+        
+        char_offset = char_offset + syl_len
     end
+    
+    local trailing = get_tags_at_pos(tag_positions, char_offset)
+    if trailing ~= "" then
+        result = result .. trailing
+    end
+    
     return result
 end
 
@@ -378,13 +498,14 @@ local function apply_karasplit(subs, sel, mode, use_fixed_k)
         local line = subs[i]
         if line.class == "dialogue" and not line.comment then
             local text = line.text
-            local clean_text = de_ktime(text)
+            -- Parse text to extract non-karaoke tags and their positions
+            local clean_text, tag_positions = parse_text_with_tags(text)
             
             if clean_text ~= "" then
                 local split = str_to_kara_array(clean_text, mode)
                 
                 if use_fixed_k then
-                    line.text = arr_to_k_str_fixed(split)
+                    line.text = arr_to_k_str_fixed(split, tag_positions)
                 else
                     -- Calculate duration in centiseconds
                     local duration = (line.end_time - line.start_time) / 10
@@ -392,7 +513,7 @@ local function apply_karasplit(subs, sel, mode, use_fixed_k)
                     
                     if text_len > 0 then
                         local time_per_letter = math.floor(duration / text_len)
-                        line.text = arr_to_k_str(split, time_per_letter)
+                        line.text = arr_to_k_str(split, time_per_letter, tag_positions)
                     end
                 end
                 

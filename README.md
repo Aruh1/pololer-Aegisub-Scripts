@@ -100,6 +100,10 @@ Script untuk membagi teks menjadi karaoke timing, port dari [karasplitter-web](h
 
 ### KaraSplitter
 
+#### v1.1
+- **Bug fix**: Non-karaoke override tags (e.g. `\q2`, `\c&H000057&`, `\fad`) tidak lagi hilang saat splitting
+- Hanya karaoke timing tags (`\k`, `\K`, `\kf`, `\ko`) yang dihapus/diganti
+
 #### v1.0
 - Rilis awal
 - Split modes: character, word, syllable (Japanese romaji)
